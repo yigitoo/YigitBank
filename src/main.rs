@@ -1,13 +1,19 @@
 static VERSION: &'static str = "0.0.1";
 mod auth;
+mod bank;
 
+pub use bank::Bank;
 pub use auth::{Auth, login::LoginForm};
+pub use utils::clear_console;
 
-fn main() -> () {
-    println!("Yigit Bank! {VERSION}");
+fn main() -> std::io::Result<()> {
+    // authentication screen.
+    let auth_user = Auth::new(VERSION);
 
-    let auth_user = Auth::new();
-    let bank_app_session = Bank::create_session(auth_user);
+    // Logged user session.
+    let app = Bank::new(auth_user);
 
-    return;
+    app.run();
+    clear_console();
+    return Ok(());
 }

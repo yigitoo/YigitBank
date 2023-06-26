@@ -1,7 +1,10 @@
+#![allow(non_snake_case)]
 pub use serde::{Serialize, Deserialize};
+pub use mongodb::bson::oid::ObjectId;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
+    pub _id: ObjectId,
     pub username: String,
     pub email: String,
     pub password: String,
@@ -13,6 +16,7 @@ pub struct User {
 impl User {
     pub fn new() -> Self {
         Self {
+            _id: ObjectId::new(),
             username: String::new(),
             email: String::new(),
             password: String::new(),
@@ -30,6 +34,10 @@ impl User {
     /// Returns a reference to the get email of this [`User`].
     pub fn set_username(&mut self, username: String) {
         self.username = username;
+    }
+
+    pub fn get_user_id(&self) -> &ObjectId {
+        &self._id
     }
 
     /// Returns a reference to the get email of this [`User`].
@@ -88,8 +96,8 @@ impl User {
     }
 
     /// Returns a reference to the get balance of usd this [`User`] | [`Balance`].
-    pub fn get_balance_usd(&self) -> &f64 {
-        &self.balance.usd
+    pub fn get_balance_dollar(&self) -> &f64 {
+        &self.balance.dollar
     }
 
     /// Returns a reference to the get balance of euro this [`User`] | [`Balance`].
@@ -103,8 +111,8 @@ impl User {
     }
 
     /// Returns a reference to the set balance of usd this [`User`] | [`Balance`].
-    pub fn set_balance_usd(&mut self, amount: f64) {
-        self.balance.usd = amount;
+    pub fn set_balance_dollar(&mut self, amount: f64) {
+        self.balance.set_dollar(amount);
     }
 
     /// Returns a reference to the set balance of euro this [`User`] | [`Balance`].
@@ -114,11 +122,16 @@ impl User {
 
 }
 
+pub enum Currencies {
+    TurkishLira,
+    Dollar,
+    Euro,
+}
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Balance {
     pub turkish_lira: f64,
-    pub usd: f64,
+    pub dollar: f64,
     pub euro: f64,
 }
 
@@ -126,7 +139,7 @@ impl Balance {
     pub fn new() -> Self {
         Self {
             turkish_lira: 0.0,
-            usd: 0.0,
+            dollar: 0.0,
             euro: 0.0,
         }
     }
@@ -138,17 +151,17 @@ impl Balance {
 
     /// Sets the turkish lira of this User's [`Balance`].
     pub fn set_turkish_lira(&mut self, turkish_lira: f64) {
-        self.turkish_lira = turkish_lira;
+        self.turkish_lira += turkish_lira;
     }
 
-    /// Returns the get usd of this User's [`Balance`].
-    pub fn get_usd(&self) -> &f64 {
-        &self.usd
+    /// Returns the get usd dollar of this User's [`Balance`].
+    pub fn get_dollar(&self) -> &f64 {
+        &self.dollar
     }
 
-    /// Sets the usd of this User's [`Balance`].
-    pub fn set_usd(&mut self, usd: f64) {
-        self.usd = usd;
+    /// Sets the usd dollar of this User's [`Balance`].
+    pub fn set_dollar(&mut self, dollar: f64) {
+        self.dollar += dollar;
     }
 
     /// Returns the euro of this User's [`Balance`].
@@ -158,6 +171,6 @@ impl Balance {
 
     /// Sets the euro of this  User's [`Balance`].
     pub fn set_euro(&mut self, euro: f64) {
-        self.euro = euro;
+        self.euro += euro;
     }
 }

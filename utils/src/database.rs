@@ -1,21 +1,21 @@
-pub use mongodb::{Client, options::{ClientOptions, FindOptions}, Collection};
+#[allow(unused_imports, non_snake_case)]
+pub use mongodb::{sync::{Client, Collection, Database}, options::{ClientOptions}};
 pub use mongodb::bson::{doc, Document, oid::{ObjectId}};
-pub use futures::{TryStreamExt};
 pub use dotenv::dotenv;
 pub use std::env;
-pub use types::{User, /* Balance */};
+pub use types::{User, Balance };
 
 #[derive(Debug, Clone)]
 pub struct DatabaseManager {
     pub current_db_name: String,
-    pub current_cluster_name: String,
-    pub current_cluster: Collection<User>,
+    pub current_collection_name: String,
+    pub database: Database,
 }
 
 impl DatabaseManager {
-    pub async fn new() -> Option<DatabaseManager> {
+    pub fn new() -> Self {
         dotenv().ok();
-        let db_uri: String = match env::var("DATABASE_URI") {
+        let db_uri: String = match env::var("DB_URI") {
             Ok(val) => val,
             Err(_) => "mongodb://127.0.0.1:27017/".to_string(),
         };
@@ -25,25 +25,17 @@ impl DatabaseManager {
             Err(_) => "bank".to_string()
         };
 
-        let cluster_name: String = match env::var("CLUSTER_NAME") {
+        let collection_name: String = match env::var("collection_NAME") {
             Ok(val) => val,
             Err(_) => "users".to_string()
         };
 
-        // I can use unwrap_or but didnt want to use it :D
-
-        let mut client_options = ClientOptions::parse(db_uri).await.ok()?;
-        client_options.app_name = Some("YigitBank".to_string());
-
-        let client = Client::with_options(client_options).ok()?;
-
+        let client = Client::with_uri_str(db_uri.as_str()).unwrap();
         let database = client.database(&db_name);
-        let collection = database.collection::<User>(&cluster_name);
-
-        Some(Self {
+        Self {
             current_db_name: db_name,
-            current_cluster_name: cluster_name,
-            current_cluster: collection,
-        })
+            current_collection_name: collection_name,
+            database: database,
+        }
     }
 }
