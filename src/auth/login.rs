@@ -1,40 +1,31 @@
-use types::{User, Balance};
-use utils::{validate_login};
+use types::{User};
+use utils::{validate_login, clear_console};
 
 use std::io::stdin as input;
 
-#[derive(Debug, Clone)]
-pub struct LoginForm {
-    pub username: String,
-    pub password: String,
-}
+pub struct LoginForm;
 
 impl LoginForm {
     /// Constructor of the LoginForm
-    pub fn new() -> Option<User> {
+    pub fn new() -> User {
         let mut username_buffer = String::new();
         let mut password_buffer = String::new();
 
         loop {
-            print!("Username: ");
-            input().read_line(&username_buffer).unwrap_or("")
-            print!("Password: ");
-            input().read_line(&mut password_buffer).unwrap_or("")
+            clear_console();
 
-            if username_buffer != "" && password_buffer != "" {
-                break
+            print!("Username: ");
+            input().read_line(&mut username_buffer).unwrap();
+
+            print!("Password: ");
+            input().read_line(&mut password_buffer).unwrap();
+
+            if let Some(user) = validate_login(&username_buffer, &password_buffer) {
+                clear_console();
+                return user;
+            } else {
+                continue;
             }
         }
-
-        if let Some(user) = ValidateLogin(username_buffer, password_buffer) {
-            return Some(user);
-        }
-        None
-    }
-}
-
-impl Default for LoginForm {
-    fn default() -> Self {
-        Self::new()
     }
 }
